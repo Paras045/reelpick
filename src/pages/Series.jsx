@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import tmdb from "../services/tmdb";
 import MovieCard from "../components/MovieCard";

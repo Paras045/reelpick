@@ -1,4 +1,0 @@
-- [x] Update src/services/tmdb.js to use TMDB API key in query params instead of Bearer token
-- [x] Change environment variable name from REACT_APP_TMDB_BEARER to REACT_APP_TMDB_API_KEY in tmdb.js
-- [x] Update error message in src/pages/Home.jsx to reference REACT_APP_TMDB_API_KEY
-- [x] Ensure .env file contains a valid TMDB API key for REACT_APP_TMDB_API_KEY

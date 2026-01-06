@@ -1,0 +1,59 @@
+.details-wrapper {
+  padding: 28px;
+  color: white;
+}
+
+.details-header {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.details-poster {
+  width: 260px;
+  border-radius: 12px;
+}
+
+.details-text {
+  max-width: 800px;
+}
+
+.trailer-box {
+  width: 100%;
+  height: 420px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+
+.trailer-fallback {
+  background: rgba(255,255,255,.06);
+  width: 100%;
+  height: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius: 12px;
+}
+
+.cast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 120px);
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.cast-item {
+  text-align: center;
+  font-size: 12px;
+}
+
+.recs-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+  gap: 18px;
+}
+
+/* keep movie cards slightly more compact on the details page */
+.details .movie-card, .recs-grid .movie-card{padding:8px}

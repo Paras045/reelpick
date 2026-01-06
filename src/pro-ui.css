@@ -1,0 +1,137 @@
+/* Pro UI overrides and design tokens - 'Pro App' look */
+:root{
+  --bg:#020202;
+  --card:#0d0d0d;
+  --panel:#101010;
+  --text:#e9e9e9;
+  --muted:#a1a1a1;
+  --accent:#ff2f2f;
+  --accent-soft:#ff2f2f18;
+  --border:#1e1e1e;
+  --radius:14px;
+}
+
+*{ box-sizing:border-box }
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto;
+  letter-spacing:.2px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Navbar: sticky glass */
+.nav{
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid #111;
+  padding:12px 26px;
+}
+
+.nav-menu a{
+  padding:6px 10px;
+  border-radius:10px;
+  transition:.25s;
+}
+
+.nav-menu a:hover{
+  background:#1b1b1b;
+}
+
+.nav-item{ position:relative }
+.nav-item::after{
+  content:"";
+  position:absolute;
+  bottom:-8px;
+  left:0;
+  width:0;
+  height:2px;
+  background:var(--accent);
+  transition:.25s;
+}
+.nav-item:hover::after{ width:100% }
+
+/* Grid: support both class names */
+.movies-grid, .movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 18px;
+  padding: 24px;
+}
+
+/* Movie card (Pro look) */
+.movie-card{
+  background:var(--card);
+  padding:10px;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  transition:.25s;
+}
+
+.movie-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 24px #0006;
+}
+
+.movie-poster{
+  width:100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius:12px;
+  transition:.25s;
+}
+
+.movie-card:hover .movie-poster{
+  filter:brightness(1.08);
+}
+
+.title, .movie-title{
+  padding:10px;
+  font-size:14px;
+  color:var(--text);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Search */
+.search-box{
+  background:#0d0d0d;
+  border:1px solid #1e1e1e;
+  padding:12px 14px;
+  border-radius:14px;
+  width:100%;
+  color:#fff;
+}
+.search-box:focus{ outline:none; border-color:#2a2a2a }
+
+.suggest-list{ background:#080808; border:1px solid #111; border-radius:14px; margin-top:8px; overflow:hidden }
+.suggest-item{ padding:12px; cursor:pointer; transition:.2s }
+.suggest-item:hover, .suggest-item.active{ background:#111 }
+
+/* Like button (minimal classy pill) */
+.like-btn{ width:100%; margin-top:8px; padding:8px 0; border-radius:10px; border:1px solid #2a2a2a; background:#0c0c0c; transition:.25s }
+.like-btn:hover{ border-color:#444 }
+.like-btn.liked{ border-color:var(--accent); background:var(--accent-soft); color:var(--accent) }
+
+/* Loading states */
+.skeleton{ background:linear-gradient(90deg,#111,#151515,#111); background-size:300% 300%; animation:shimmer 1.2s infinite; border-radius:12px }
+@keyframes shimmer{ 0%{background-position:0 0} 100%{background-position:-300% 0} }
+
+/* Movie details */
+.details{ display:grid; grid-template-columns:280px 1fr; gap:28px }
+@media(max-width:900px){ .details{ grid-template-columns:1fr } }
+
+.meta{ display:flex; flex-wrap:wrap; gap:12px; color:var(--muted) }
+.meta span::before{ content:"• "; color:var(--accent) }
+
+.section-title{ margin-bottom:14px; border-bottom:1px solid #111; padding-bottom:8px }
+
+/* Responsive breakpoints for movie grid */
+@media(max-width:1024px){ .movies-grid, .movie-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } }
+@media(max-width:768px){ .movies-grid, .movie-grid{ grid-template-columns: repeat(2, 1fr); padding:16px } }
+@media(max-width:480px){ .movies-grid, .movie-grid{ grid-template-columns: repeat(1, 1fr); padding:12px } }

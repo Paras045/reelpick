@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import tmdb from "../services/tmdb";
 import MovieCard from "../components/MovieCard";
@@ -19,10 +20,10 @@ export default function Movies() {
   }, []);
 
   return (
-    <div>
+    <div style={{ paddingTop: '80px' }}>
       <h2>Popular Movies</h2>
       {error && <div style={{ color: "#ffcc00" }}>{error}</div>}
-      <div className="movie-grid">
+      <div className="movies-grid">
         {movies.map(m => (
           <MovieCard key={m.id} movie={m} />
         ))}

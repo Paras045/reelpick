@@ -1,0 +1,30 @@
+/* MadeForYou page styles */
+
+.made-container{padding:28px 20px 40px}
+.section-header{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--border);padding-bottom:12px}
+.section-title{font-size:24px;color:var(--text);margin:0}
+.section-subtitle{color:var(--muted);margin:0;font-size:14px}
+
+/* make the recommendations grid breathe */
+.recommend-grid{gap:24px}
+.made-container .movie-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));align-items:start}
+.made-container .movie-grid > div{display:flex;flex-direction:column;align-items:stretch}
+.made-container .movie-card{display:flex;flex-direction:column;justify-content:flex-start;gap:8px}
+
+/* small reason chip under each card */
+.reason-chip{display:inline-block;margin-top:10px;color:var(--muted);font-size:12px;background:rgba(255,255,255,0.02);padding:6px 8px;border-radius:8px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+@media (min-width:1400px){
+  .made-container .movie-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+}
+
+@media (max-width:768px){
+  .section-header{padding-bottom:10px;margin-bottom:12px}
+  .made-container .movie-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+  .reason-chip{max-width:160px}
+}
+
+@media (max-width:480px){
+  .made-container .movie-grid{grid-template-columns:repeat(1,1fr);gap:12px}
+  .section-title{font-size:20px}
+}

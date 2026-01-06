@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import tmdb from "../services/tmdb";
 import { likeMovie, unlikeMovie } from "../services/likes";
 import { auth, db } from "../services/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import MovieCard from "../components/MovieCard";
 import { doc, getDoc } from "firebase/firestore";
 import { saveWatch } from "../services/history"; 
 
@@ -15,27 +17,32 @@ export default function MovieDetails(){
   const [trailer,setTrailer]=useState(null);
   const [cast,setCast]=useState([]);
   const [similar,setSimilar]=useState([]);
+  const [error, setError] = useState(null);
 
   const [liked, setLiked] = useState(false);
 
   // keep a simple alias so templates can reference `recs` as recommended
   const recs = similar || [];
 
-  useEffect(() => {
-    if (!movie || !auth.currentUser) return;
-    const ref = doc(db, "userLikes", `${auth.currentUser.uid}_${movie.id}`);
-    getDoc(ref).then(snap => setLiked(!!snap.exists()));
-  }, [movie?.id]);
+  const [user] = useAuthState(auth);
 
   useEffect(() => {
-    if (auth.currentUser && movie) {
-      saveWatch(auth.currentUser.uid, movie).catch(err => console.error("saveWatch failed", err));
+    if (!movie || !user) return;
+    const ref = doc(db, "userLikes", `${user.uid}_${movie.id}`);
+    getDoc(ref).then(snap => setLiked(!!snap.exists()));
+  }, [user, movie?.id]);
+
+  useEffect(() => {
+    if (user && movie) {
+      saveWatch(user.uid, movie).catch(err => console.error("saveWatch failed", err));
     }
-  }, [movie]);
+  }, [user, movie]);
 
   useEffect(() => {
     const fetchMovie = async () => {
       try {
+        setError(null);
+        setMovie(null); // clear previous movie to avoid stale UI while loading
         const res = await tmdb.get(`/movie/${id}`, { params: { append_to_response: "credits,videos,recommendations" } });
         setMovie(res.data);
         const vid = (res.data.videos?.results || []).find(v=>v.type==="Trailer"&&v.site==="YouTube") || (res.data.videos?.results||[])[0];
@@ -44,6 +51,8 @@ export default function MovieDetails(){
         setSimilar((res.data.recommendations?.results||[]).slice(0,8));
       } catch (err) {
         console.error("Failed to fetch movie:", err);
+        setError('Movie not found or unavailable');
+        setMovie(null);
       }
     };
     fetchMovie();
@@ -51,7 +60,8 @@ export default function MovieDetails(){
 
 
 
-  if(!movie) return <p style={{color:"#fff"}}>Loading…</p>;
+  if (error) return <p style={{color:"#ffcc00"}}>{error}</p>;
+  if(!movie) return <p style={{color:"#fff"}}>Loading…</p>; 
 
   return(
     <div style={{padding:28, color:"#fff"}}>
@@ -71,8 +81,8 @@ export default function MovieDetails(){
         <span>{new Date(movie.release_date || movie.first_air_date).toDateString()}</span>
       </div>
 
-      {/* AUTOPLAY PREVIEW */}
-      {trailer && (
+      {/* AUTOPLAY PREVIEW OR FALLBACK */}
+      {trailer ? (
         <iframe
           className="trailer-frame"
           width="100%"
@@ -81,33 +91,41 @@ export default function MovieDetails(){
           allow="autoplay"
           style={{borderRadius:14,marginTop:14}}
         />
+      ) : (
+        <div className="trailer-fallback" style={{width:'100%',height:420, background:'linear-gradient(135deg, rgba(15,15,15,0.9), rgba(25,25,25,0.9))', borderRadius:14, display:'flex', alignItems:'center', justifyContent:'center', color:'#aaa', marginTop:14, backdropFilter:'blur(8px)'}}>
+          Trailer Not Available
+        </div>
       )}
 
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 10 }}>
-        <button
-          className="btn"
-          onClick={()=>window.open(`https://youtube.com/watch?v=${trailer}`)}
-        >
-          ▶ Watch Trailer
-        </button>
+        {trailer ? (
+          <button
+            className="btn"
+            onClick={()=>window.open(`https://youtube.com/watch?v=${trailer}`)}
+          >
+            ▶ Watch Trailer
+          </button>
+        ) : (
+          <button className="btn" disabled style={{opacity:0.6, cursor:'not-allowed'}}>Trailer not available</button>
+        )}
 
         <button
           onClick={async () => {
-            if (!auth.currentUser) return;
+            if (!user) return;
 
             if (liked) {
-              await unlikeMovie(auth.currentUser.uid, movie.id);
+              await unlikeMovie(user.uid, movie.id);
               setLiked(false);
             } else {
-              await likeMovie(auth.currentUser.uid, movie);
+              await likeMovie(user.uid, movie);
               setLiked(true);
             }
           }}
           className={`like-btn ${liked ? "liked" : ""}`}
         >
-          {liked ? "💔 Unlike" : "❤️ Like"}
+          {liked ? "Unlike" : "Like"}
         </button>
-      </div>
+      </div> 
 
       <p className="plot">{movie.overview}</p>
 
@@ -126,16 +144,9 @@ export default function MovieDetails(){
 
       <h3>Recommended</h3>
 
-      <div className="recs">
+      <div className="movie-grid recs-grid">
         {recs?.map(rec => (
-          <Link
-            key={rec.id}
-            to={`/movie/${rec.id}`}
-            className="rec-card"
-          >
-            <img src={`https://image.tmdb.org/t/p/w300${rec.poster_path}`} alt={rec.title || rec.name} />
-            <p>{rec.title || rec.name}</p>
-          </Link>
+          <MovieCard key={rec.id} movie={rec} />
         ))}
       </div> 
     </div>

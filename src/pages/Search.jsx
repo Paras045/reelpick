@@ -1,3 +1,4 @@
+import "./Search.css";
 import debounce from "lodash.debounce";
 import { searchMulti } from "../services/tmdb";
 import { useNavigate } from "react-router-dom";

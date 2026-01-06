@@ -1,0 +1,9 @@
+.page {
+  padding: 24px 32px;
+  color: white;
+}
+
+.reason {
+  font-size: 12px;
+  opacity: .8;
+}

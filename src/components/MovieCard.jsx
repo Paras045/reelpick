@@ -1,35 +1,32 @@
+import "./MovieCard.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../services/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { likeMovie, unlikeMovie } from "../services/likes";
 
-const MovieCard = ({ movie }) => {
+const MovieCard = ({ movie, note }) => {
   const [liked, setLiked] = useState(false);
   const navigate = useNavigate();
+  const [user] = useAuthState(auth);
 
   useEffect(() => {
-    const checkLiked = async () => {
-      if (!auth.currentUser) return;
+    if (!user) return;
 
-      const ref = doc(db, "userLikes", `${auth.currentUser.uid}_${movie.id}`);
-      const snap = await getDoc(ref);
-
-      if (snap.exists()) setLiked(true);
-    };
-
-    checkLiked();
-  }, [movie.id]);
+    const ref = doc(db, "userLikes", `${user.uid}_${movie.id}`);
+    getDoc(ref).then(snap => setLiked(!!snap.exists()));
+  }, [user, movie.id]);
 
   const handleLike = async (e) => {
     e.stopPropagation(); // prevent card click
-    if (!auth.currentUser) return;
+    if (!user) return;
 
     if (liked) {
-      await unlikeMovie(auth.currentUser.uid, movie.id);
+      await unlikeMovie(user.uid, movie.id);
       setLiked(false);
     } else {
-      await likeMovie(auth.currentUser.uid, movie);
+      await likeMovie(user.uid, movie);
       setLiked(true);
     }
   };
@@ -48,11 +45,16 @@ const MovieCard = ({ movie }) => {
 
       <p className="movie-title">{movie.title || movie.name}</p>
 
+      {/** optional note (e.g., reasons for recommendation) */}
+      {typeof note === 'string' && note.length > 0 && (
+        <div className="movie-note">{note}</div>
+      )}
+
       <button
         className={`like-btn ${liked ? "liked" : ""}`}
         onClick={handleLike}
       >
-        {liked ? "💔 Unlike" : "❤️ Like"}
+        {liked ? "Unlike" : "Like"}
       </button>
     </div>
   );

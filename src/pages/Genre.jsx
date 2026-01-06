@@ -1,49 +1,57 @@
-import { useEffect, useState } from "react";
+
 import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import tmdb from "../services/tmdb";
 import MovieCard from "../components/MovieCard";
 
-const SLUG_TO_ID = {
+const GENRES = {
   action: 28,
   drama: 18,
-  scifi: 878,
   comedy: 35,
   thriller: 53,
-  adventure: 12,
-  romance: 10749,
-  crime: 80
+  scifi: 878,
 };
 
 export default function Genre(){
-  const { slug } = useParams();
+  const { name } = useParams();
   const [movies, setMovies] = useState([]);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const id = SLUG_TO_ID[slug?.toLowerCase()];
-    if (!id) {
-      setError(`Unknown category: ${slug}`);
-      setMovies([]);
-      return;
-    }
-
-    setError(null);
-    tmdb
-      .get("/discover/movie", { params: { with_genres: id } })
-      .then(res => setMovies(res.data?.results || []))
-      .catch(err => {
-        console.error("Failed to load genre movies:", err);
-        setError("Failed to load movies for this category. Check console for details.");
+    const load = async () => {
+      setLoading(true);
+      const id = GENRES[name?.toLowerCase()];
+      if (!id) {
         setMovies([]);
-      });
-  }, [slug]);
+        setLoading(false);
+        return;
+      }
+
+      try{
+        const res = await tmdb.get(`/discover/movie`, { params: { with_genres: id } });
+        setMovies(res.data.results || []);
+      }catch(err){
+        console.error('Failed to load genre:', err);
+        setMovies([]);
+      } finally{
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [name]);
 
   return (
-    <div>
-      <h2>Category: {slug}</h2>
-      {error && <div style={{ color: "#ffcc00" }}>{error}</div>}
+    <div style={{padding:20}}>
+      <h2 style={{color:'#fff'}}>{name ? `${name} Movies` : 'Genre'}</h2>
+
+      {loading && <p style={{color:'#aaa'}}>Loading…</p>}
 
       <div className="movie-grid">
+        {movies.length === 0 && !loading && (
+          <p style={{color:'#aaa'}}>No movies found for this genre.</p>
+        )}
+
         {movies.map(m => (
           <MovieCard key={m.id} movie={m} />
         ))}
