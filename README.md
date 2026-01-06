@@ -1,109 +1,173 @@
-# ReelPick 🍿
+🎬 ReelPick — Smart Movie & Series Recommender
 
-A modern movie discovery and recommendation web app built with React, powered by The Movie Database (TMDB) API and Firebase for authentication and data storage.
+ReelPick is a modern movie & TV discovery platform powered by React + TMDB + Firebase + personalization.
 
-## Features
+It doesn’t just show trailers — it learns your taste and builds recommendations for you.
 
-- **Movie Discovery**: Browse popular, trending, and top-rated movies
-- **User Authentication**: Sign up and log in with Firebase Authentication
-- **Like/Unlike Movies**: Toggle likes on movies with real-time Firestore integration
-- **Personalized Recommendations**: Get movie suggestions based on your liked movies
-- **Search Functionality**: Find movies by title or genre
-- **Responsive Design**: Optimized for desktop and mobile devices
+🚀 Features
+🔍 Discovery
 
-## Tech Stack
+✓ Trending (Global + Country-based)
+✓ Live search suggestions
+✓ Genre browsing
+✓ Movie & Series pages
 
-- **Frontend**: React.js with Hooks
-- **Backend**: Firebase (Authentication, Firestore)
-- **API**: The Movie Database (TMDB) API
-- **Styling**: CSS with modern design patterns
-- **Build Tool**: Create React App
+❤️ Personalisation
 
-## Getting Started
+✓ Like / Unlike movies
+✓ Save your picks
+✓ First-time taste onboarding
+✓ “Made For You” page
+✓ “Top Picks Today” — updates daily
 
-### Prerequisites
+🎥 Movie Details
 
-- Node.js (v14 or higher)
-- npm or yarn
-- TMDB API key (get one from [TMDB](https://www.themoviedb.org/settings/api))
-- Firebase project setup
+✓ Autoplay muted trailer
+✓ Cast info
+✓ Recommended titles
+✓ Fallback when no trailer exists
 
-### Installation
+🌎 Trending By Region
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/reelpick.git
-   cd reelpick
-   ```
+✓ Select country from dropdown
+✓ India / USA / UK / Japan / Korea / France / Germany / Global
+✓ Results refresh instantly
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+🔐 Auth + Storage
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add your API keys:
-   ```
-   VITE_TMDB_KEY=your_tmdb_api_token_here
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-   ```
+✓ Firebase Google Sign-In
+✓ Likes & Preferences stored per-user
+✓ Realtime updates
 
-4. Start the development server:
-   ```bash
-   npm start
-   ```
+🛠️ Tech Stack
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+React + React Router
 
-## Available Scripts
+Firebase Hosting / Firestore / Auth
 
-- `npm start` - Runs the app in development mode
-- `npm test` - Launches the test runner
-- `npm run build` - Builds the app for production
-- `npm run eject` - Ejects from Create React App (irreversible)
+TMDB API
 
-## Project Structure
+Axios
 
-```
-src/
-├── components/          # Reusable UI components
-│   ├── MovieCard.jsx    # Movie display card with like functionality
-│   ├── Login.jsx        # Authentication component
-│   └── Navbar.jsx       # Navigation bar
-├── pages/               # Page components
-│   ├── Home.jsx         # Main movie browsing page
-│   ├── MovieDetails.jsx # Individual movie details
-│   ├── Profile.jsx      # User profile page
-│   └── Search.jsx       # Movie search page
-├── services/            # API and utility services
-│   ├── firebase.js      # Firebase configuration
-│   ├── likes.js         # Like/unlike functionality
-│   ├── recommend.js     # Recommendation logic
-│   └── tmdb.js          # TMDB API integration
-├── context/             # React context providers
-└── App.js               # Main app component
-```
+Debounced search
 
-## Contributing
+Minimal clean UI
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+📦 Local Setup
+1️⃣ Clone
+git clone https://github.com/YOUR_USERNAME/ReelPick.git
+cd ReelPick
 
-## License
+2️⃣ Install deps
+npm install
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+3️⃣ Create .env.local
 
-## Acknowledgments
+👉 Only TMDB goes here. Do NOT put Firebase keys.
 
-- [The Movie Database (TMDB)](https://www.themoviedb.org/) for providing movie data
-- [Firebase](https://firebase.google.com/) for backend services
-- [Create React App](https://create-react-app.dev/) for the project boilerplate
+REACT_APP_TMDB_API_KEY=YOUR_V3_KEY
+REACT_APP_TMDB_BEARER=YOUR_V4_TOKEN
+
+
+🔥 Tip: Never commit this file.
+
+4️⃣ Run dev server
+npm start
+
+
+App → http://localhost:3000/
+
+☁️ Deploying to Firebase
+
+Build:
+
+npm run build
+
+
+Deploy:
+
+firebase deploy
+
+🧠 Important
+
+Your firebaseConfig stays in code (React-side), like every normal Firebase web app.
+Just don’t commit .env.local, and you’re solid.
+
+Also make sure:
+
+"rewrites": [
+  { "source": "**", "destination": "/index.html" }
+]
+
+
+Otherwise React Router = white screen 💀
+
+🧾 Data Model
+Firestore Collections
+userPreferences/{uid}
+userLikes/{uid_movieId}
+recommendationsCache/{uid}
+watchHistory/{uid}
+
+🎯 Recommendation Logic (Explainable)
+
+ReelPick scores movies based on:
+
+✔ Fav actors
+✔ Fav directors
+✔ Fav writers
+✔ Genres
+✔ Language
+✔ Popularity
+✔ Recency
+✔ Daily stable randomness
+
+So it’s predictable — not random nonsense.
+
+🌍 Country Trending
+
+Global:
+
+/trending/movie/week
+
+
+Country:
+
+/discover/movie?with_origin_country=IN
+
+
+More regions supported.
+
+🧪 QA
+
+Run automated UI tests:
+
+node tests/qa.js
+
+
+Covers routing / search / details / fallback / errors.
+
+🔐 Security Notes
+
+❌ Do NOT put Firebase keys in .env.local
+✔ Firebase Web SDK keys are public — that’s normal
+✔ TMDB keys should stay in .env.local
+
+If you ever add AI (Gemini etc) — run it server-side only
+
+⭐ Future Upgrades
+
+Cloud-generated recs
+
+Gemini taste learning
+
+Watch history timeline
+
+Advanced mood filters
+
+Better mobile UI
+
+💜 Credits
+
+Movie data — TMDB
+Hosting + Auth — Firebase
