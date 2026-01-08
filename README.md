@@ -1,109 +1,187 @@
-# ReelPick 🍿
+🎬 ReelPick — Smart Movie & Series Recommender
 
-A modern movie discovery and recommendation web app built with React, powered by The Movie Database (TMDB) API and Firebase for authentication and data storage.
+ReelPick is a personalized movie & TV recommendation app built with React + Firebase + TMDB API.
+It recommends content based on your preferences, likes, and engagement — similar to Spotify’s “Made For You”, but for films 🎥
 
-## Features
+🚀 Features
+🔐 Authentication
 
-- **Movie Discovery**: Browse popular, trending, and top-rated movies
-- **User Authentication**: Sign up and log in with Firebase Authentication
-- **Like/Unlike Movies**: Toggle likes on movies with real-time Firestore integration
-- **Personalized Recommendations**: Get movie suggestions based on your liked movies
-- **Search Functionality**: Find movies by title or genre
-- **Responsive Design**: Optimized for desktop and mobile devices
+✔ Google Login using Firebase Authentication
+✔ Secure user sessions
+✔ Logout support
 
-## Tech Stack
+❤️ Likes & Favorites
 
-- **Frontend**: React.js with Hooks
-- **Backend**: Firebase (Authentication, Firestore)
-- **API**: The Movie Database (TMDB) API
-- **Styling**: CSS with modern design patterns
-- **Build Tool**: Create React App
+✔ Save movies you like
+✔ View all your liked movies in Your Picks
+✔ Syncs in realtime with Firestore
 
-## Getting Started
+🔍 Search
 
-### Prerequisites
+✔ Live search suggestions (Google-style)
+✔ Keyboard navigation
+✔ Click to open movie detail page
 
-- Node.js (v14 or higher)
-- npm or yarn
-- TMDB API key (get one from [TMDB](https://www.themoviedb.org/settings/api))
-- Firebase project setup
+🎥 Movie Details
 
-### Installation
+✔ Overview, cast, trailer (autoplay muted)
+✔ Recommended titles
+✔ Clean responsive UI
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/reelpick.git
-   cd reelpick
-   ```
+🎯 Personalized Recommendations
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+✔ “Made For You” page
+✔ Based on your preferences & likes
+✔ Explainable scoring system
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory and add your API keys:
-   ```
-   VITE_TMDB_KEY=your_tmdb_api_token_here
-   VITE_FIREBASE_API_KEY=your_firebase_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   VITE_FIREBASE_APP_ID=your_app_id
-   VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-   ```
+🌞 Daily Feed — Top Picks Today
 
-4. Start the development server:
-   ```bash
-   npm start
-   ```
+✔ Deterministic daily recommendations
+✔ Updates every day
+✔ Cached per-user
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+🇮🇳 Region-Aware Trending
 
-## Available Scripts
+✔ View what’s trending globally or by country
 
-- `npm start` - Runs the app in development mode
-- `npm test` - Launches the test runner
-- `npm run build` - Builds the app for production
-- `npm run eject` - Ejects from Create React App (irreversible)
+🛠 Tech Stack
 
-## Project Structure
+Frontend
 
-```
-src/
-├── components/          # Reusable UI components
-│   ├── MovieCard.jsx    # Movie display card with like functionality
-│   ├── Login.jsx        # Authentication component
-│   └── Navbar.jsx       # Navigation bar
-├── pages/               # Page components
-│   ├── Home.jsx         # Main movie browsing page
-│   ├── MovieDetails.jsx # Individual movie details
-│   ├── Profile.jsx      # User profile page
-│   └── Search.jsx       # Movie search page
-├── services/            # API and utility services
-│   ├── firebase.js      # Firebase configuration
-│   ├── likes.js         # Like/unlike functionality
-│   ├── recommend.js     # Recommendation logic
-│   └── tmdb.js          # TMDB API integration
-├── context/             # React context providers
-└── App.js               # Main app component
-```
+React
 
-## Contributing
+React Router
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Axios
 
-## License
+Backend
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Firebase Authentication
 
-## Acknowledgments
+Cloud Firestore
 
-- [The Movie Database (TMDB)](https://www.themoviedb.org/) for providing movie data
-- [Firebase](https://firebase.google.com/) for backend services
-- [Create React App](https://create-react-app.dev/) for the project boilerplate
+Data
+
+TMDB API
+
+🔧 Installation & Setup (Local)
+1️⃣ Clone the Repo
+git clone https://github.com/YOUR_USERNAME/ReelPick.git
+cd ReelPick
+
+2️⃣ Install Dependencies
+npm install
+
+🎬 TMDB API Setup
+
+Create a TMDB account → generate:
+
+✔ API Key (v3)
+✔ Read Access Token (v4)
+
+Create a .env.local file in the root of your project:
+
+REACT_APP_TMDB_API_KEY=your_v3_api_key_here
+REACT_APP_TMDB_BEARER=your_v4_token_here
+
+
+⚠ Do NOT commit .env.local
+(It should already be in .gitignore)
+
+🔥 Firebase Setup (Authentication + Firestore ONLY)
+1️⃣ Create Firebase Project
+
+https://console.firebase.google.com/
+
+2️⃣ Enable Authentication
+
+Go to
+Build → Authentication → Sign-in method
+
+Enable:
+✔ Google Sign-in
+
+3️⃣ Create Firestore Database
+
+Go to
+Build → Firestore Database
+
+Choose:
+✔ Start in production mode
+✔ Set region
+
+4️⃣ Add Web App
+
+Go to
+Project Settings → General → Your Apps → Web
+
+Copy the config — it looks like this:
+
+const firebaseConfig = {
+  apiKey: "XXXX",
+  authDomain: "XXXX.firebaseapp.com",
+  projectId: "XXXX",
+  storageBucket: "XXXX.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+5️⃣ Paste config into:
+
+src/services/firebase.js
+
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "XXXX",
+  authDomain: "XXXX.firebaseapp.com",
+  projectId: "XXXX",
+  storageBucket: "XXXX.appspot.com",
+  messagingSenderId: "XXXX",
+  appId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+export const provider = new GoogleAuthProvider();
+export const db = getFirestore(app);
+
+▶️ Run the App
+npm start
+
+
+App runs at:
+http://localhost:3000
+
+🧠 Firestore Collections Used
+userLikes/
+userPreferences/
+recommendationsCache/
+watchHistory/   (planned)
+
+🔒 Security Notes
+
+🚫 Do NOT hard-code API keys
+🚫 Do NOT commit .env.local
+🚫 Do NOT expose Firebase Admin SDK in frontend
+
+🛣 Roadmap
+
+🔲 Spotify-style onboarding (fav actors/directors)
+🔲 Cast-based recommendations
+🔲 Gemini-powered taste modeling (server-side only)
+🔲 Multi-profile support
+🔲 Watch history tracking
+
+🤝 Contributing
+
+Pull requests welcome ✨
+Open an issue for feature requests / bugs.
+
+⭐ Support
+
+If you like this project — star the repo ⭐
+It helps more than you think 🙂
