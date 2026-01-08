@@ -1,4 +1,4 @@
-import "./Home.css";
+ import "./Home.css";
 import { useEffect, useState } from "react";
 import { getTrendingGlobal, getTrendingByRegion } from "../services/tmdb";
 import { getRecommendations } from "../services/recommend";
@@ -6,7 +6,7 @@ import { REGIONS } from "../services/regions";
 import MovieCard from "../components/MovieCard";
 
 const Home = ({ likedMovies }) => {
-  const [region, setRegion] = useState("IN");
+  const [region, setRegion] = useState("GLOBAL");
   const [movies, setMovies] = useState([]);
   const [recs, setRecs] = useState([]);
   const [error, setError] = useState(null);
@@ -26,8 +26,10 @@ const Home = ({ likedMovies }) => {
         return;
       }
 
+      console.log("Fetching trending for region:", region);
+
       try {
-        const data = await getTrendingByRegion(region);
+        const data = region === "GLOBAL" ? await getTrendingGlobal() : await getTrendingByRegion(region);
 
         console.log("TRENDING DATA:", data);
 
@@ -55,21 +57,18 @@ const Home = ({ likedMovies }) => {
         }
       } catch (err) {
         console.error("Failed to load trending:", err);
-        if (region !== "US") {
-          setRegion("US");
-        } else {
-          setError("Trending unavailable for this region. Showing global trending instead.");
-          try {
-            const globalData = await getTrendingGlobal();
-            const globalTrending = Array.isArray(globalData)
-              ? globalData
-              : globalData?.data?.results || globalData?.results || [];
-            setMovies(globalTrending);
-            setRecs(getRecommendations(likedMovies, globalTrending));
-          } catch (globalErr) {
-            setMovies([]);
-            setRecs([]);
-          }
+        setError("Trending unavailable for this region. Showing global trending instead.");
+        try {
+          const globalData = await getTrendingGlobal();
+          const globalTrending = Array.isArray(globalData)
+            ? globalData
+            : globalData?.data?.results || globalData?.results || [];
+          setMovies(globalTrending);
+          setRecs(getRecommendations(likedMovies, globalTrending));
+          localStorage.setItem(`trending_${region}`, JSON.stringify(globalTrending));
+        } catch (globalErr) {
+          setMovies([]);
+          setRecs([]);
         }
       } finally {
         setLoading(false);

@@ -22,37 +22,18 @@ tmdb.interceptors.request.use((config) => {
   return config;
 });
 
-export const getTrending = () => tmdb.get("/discover/movie", {
-  params: {
-    sort_by: "popularity.desc",
-    include_adult: false,
-    include_video: false,
-    language: "en-US",
-    page: 1,
-    with_watch_monetization_types: "flatrate"
-  }
-});
-export const getTrendingGlobal = () => tmdb.get("/discover/movie", {
-  params: {
-    sort_by: "popularity.desc",
-    include_adult: false,
-    include_video: false,
-    language: "en-US",
-    page: 1,
-    with_watch_monetization_types: "flatrate"
-  }
-});
-export const getTrendingByRegion = (regionCode, type = "movie") => tmdb.get(`/discover/${type}`, {
-  params: {
-    sort_by: "popularity.desc",
-    include_adult: false,
-    include_video: false,
-    language: "en-US",
-    page: 1,
-    with_watch_monetization_types: "flatrate",
-    watch_region: regionCode
-  }
-});
+export const getTrendingGlobal = () =>
+  tmdb.get("/trending/movie/week");
+
+export const getTrendingByRegion = (region) =>
+  tmdb.get("/discover/movie", {
+    params: {
+      sort_by: "popularity.desc",
+      watch_region: region,
+      include_adult: false,
+      page: 1
+    }
+  });
 export const searchMulti = (query) => tmdb.get(`/search/multi`, { params: { query } });
 export const getVideos = (id, media_type = "movie") => tmdb.get(`/${media_type}/${id}/videos`);
 export const getDetails = (id, type = "movie") => tmdb.get(`/${type}/${id}`);
