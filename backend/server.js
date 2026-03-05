@@ -44,7 +44,6 @@ app.use(
   })
 );
 
-// JSON body parsing with increased limit (for large liked/history sets)
 
 
 // HTTP request logging (skip in test env)
