@@ -30,11 +30,6 @@ const allowedOrigins = [
   process.env.CLIENT_ORIGIN
 ].filter(Boolean);
 
-app.use(
-  cors({
-
-
-app.use(express.json({ limit: '50mb' }));
 
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
