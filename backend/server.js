@@ -40,9 +40,7 @@ app.use(
       }
     },
     methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
 
-if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
