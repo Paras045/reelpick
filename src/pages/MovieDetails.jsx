@@ -1,40 +1,44 @@
-
+import "./MovieDetails.css";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import tmdb from "../services/tmdb";
+import { getMovieDetails } from "../services/api";
 import { likeMovie, unlikeMovie } from "../services/likes";
 import { auth, db } from "../services/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import MovieCard from "../components/MovieCard";
+import MovieCard from "../components/movies/MovieCard";
+import MovieRow from "../components/movies/MovieRow";
+import WatchProviders from "../components/WatchProviders";
+import AuthModal from "../components/ui/AuthModal";
 import { doc, getDoc } from "firebase/firestore";
-import { saveWatch } from "../services/history"; 
+import { saveWatch } from "../services/history";
 
-export default function MovieDetails(){
+export default function MovieDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [movie,setMovie]=useState(null);
-  const [trailer,setTrailer]=useState(null);
-  const [cast,setCast]=useState([]);
-  const [similar,setSimilar]=useState([]);
+  const [movie, setMovie] = useState(null);
+  const [trailer, setTrailer] = useState(null);
+  const [cast, setCast] = useState([]);
+  const [similar, setSimilar] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [liked, setLiked] = useState(false);
-
-  // keep a simple alias so templates can reference `recs` as recommended
-  const recs = similar || [];
-
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const [user] = useAuthState(auth);
+
+  useEffect(() => window.scrollTo(0, 0), [id]);
 
   useEffect(() => {
     if (!movie || !user) return;
     const ref = doc(db, "userLikes", `${user.uid}_${movie.id}`);
-    getDoc(ref).then(snap => setLiked(!!snap.exists()));
+    getDoc(ref).then((snap) => setLiked(!!snap.exists()));
   }, [user, movie?.id]);
 
   useEffect(() => {
     if (user && movie) {
-      saveWatch(user.uid, movie).catch(err => console.error("saveWatch failed", err));
+      saveWatch(user.uid, movie).catch(console.error);
     }
   }, [user, movie]);
 
@@ -42,113 +46,171 @@ export default function MovieDetails(){
     const fetchMovie = async () => {
       try {
         setError(null);
-        setMovie(null); // clear previous movie to avoid stale UI while loading
-        const res = await tmdb.get(`/movie/${id}`, { params: { append_to_response: "credits,videos,recommendations" } });
-        setMovie(res.data);
-        const vid = (res.data.videos?.results || []).find(v=>v.type==="Trailer"&&v.site==="YouTube") || (res.data.videos?.results||[])[0];
+        setLoading(true);
+        const res = await getMovieDetails(id);
+        const data = res.data.data;
+
+        setMovie(data);
+        const vid =
+          (data.videos?.results || []).find((v) => v.type === "Trailer" && v.site === "YouTube") ||
+          (data.videos?.results || [])[0];
+
         setTrailer(vid?.key);
-        setCast((res.data.credits?.cast||[]).slice(0,6));
-        setSimilar((res.data.recommendations?.results||[]).slice(0,8));
+        setCast((data.credits?.cast || []).slice(0, 10));
+        setSimilar(data.recommendations?.results || []);
       } catch (err) {
         console.error("Failed to fetch movie:", err);
-        setError('Movie not found or unavailable');
-        setMovie(null);
+        setError("Movie not found or unavailable.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchMovie();
   }, [id]);
 
+  const handleLike = async () => {
+    if (!user) return setShowAuthModal(true);
+    if (liked) {
+      await unlikeMovie(user.uid, movie.id);
+      setLiked(false);
+    } else {
+      await likeMovie(user.uid, movie);
+      setLiked(true);
+    }
+  };
 
+  if (error) return <div className="mdetails__msg">{error}</div>;
+  if (loading) return <div className="mdetails__msg mdetails__msg--loading">Loading…</div>;
+  if (!movie) return null;
 
-  if (error) return <p style={{color:"#ffcc00"}}>{error}</p>;
-  if(!movie) return <p style={{color:"#fff"}}>Loading…</p>; 
+  const backdrop = movie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` : null;
+  const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null;
+  const year = (movie.release_date || movie.first_air_date || "").slice(0, 4);
 
-  return(
-    <div style={{padding:28, color:"#fff"}}>
-
-      <button className="btn" onClick={()=>navigate(-1)}>← Back</button>
-
-      <h1 style={{marginTop:12}}>{movie.title||movie.name}</h1>
-
-      <div className="genre-row">
-        {movie.genres?.map(g => (
-          <span key={g.id}>{g.name}</span>
-        ))}
-      </div>
-
-      <div className="meta-row">
-        <span>{movie.runtime} min</span>
-        <span>{new Date(movie.release_date || movie.first_air_date).toDateString()}</span>
-      </div>
-
-      {/* AUTOPLAY PREVIEW OR FALLBACK */}
-      {trailer ? (
-        <iframe
-          className="trailer-frame"
-          width="100%"
-          height="420"
-          src={`https://www.youtube.com/embed/${trailer}?autoplay=1&mute=1`}
-          allow="autoplay"
-          style={{borderRadius:14,marginTop:14}}
-        />
-      ) : (
-        <div className="trailer-fallback" style={{width:'100%',height:420, background:'linear-gradient(135deg, rgba(15,15,15,0.9), rgba(25,25,25,0.9))', borderRadius:14, display:'flex', alignItems:'center', justifyContent:'center', color:'#aaa', marginTop:14, backdropFilter:'blur(8px)'}}>
-          Trailer Not Available
+  return (
+    <div className="mdetails">
+      {/* Cinematic Hero Section */}
+      <section className="mdetails__hero">
+        <div className="mdetails__hero-bg">
+          {backdrop && <img src={backdrop} alt="" className="mdetails__hero-img" />}
+          <div className="mdetails__hero-gradient" />
         </div>
-      )}
 
-      <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 10 }}>
-        {trailer ? (
-          <button
-            className="btn"
-            onClick={()=>window.open(`https://youtube.com/watch?v=${trailer}`)}
-          >
-            ▶ Watch Trailer
-          </button>
-        ) : (
-          <button className="btn" disabled style={{opacity:0.6, cursor:'not-allowed'}}>Trailer not available</button>
+        <div className="mdetails__hero-content">
+          <div className="mdetails__hero-left">
+            <div className="mdetails__poster-wrap">
+              {!imgLoaded && <div className="skeleton-base mdetails__poster-skeleton" />}
+              {poster ? (
+                <img
+                  src={poster}
+                  alt={movie.title || movie.name}
+                  className={`mdetails__poster ${imgLoaded ? "mdetails__poster--loaded" : ""}`}
+                  onLoad={() => setImgLoaded(true)}
+                />
+              ) : (
+                <div className="mdetails__poster-placeholder">🎬</div>
+              )}
+            </div>
+          </div>
+
+          <div className="mdetails__hero-right">
+            <h1 className="mdetails__title">{movie.title || movie.name} {year && <span className="mdetails__year">({year})</span>}</h1>
+
+            <div className="mdetails__meta">
+              {movie.vote_average > 0 && <span className="mdetails__rating">⭐ {movie.vote_average.toFixed(1)}</span>}
+              <span className="mdetails__runtime">{movie.runtime} min</span>
+              <div className="mdetails__genres">
+                {movie.genres?.map((g) => <span key={g.id} className="mdetails__tag">{g.name}</span>)}
+              </div>
+            </div>
+
+            <p className="mdetails__tagline">{movie.tagline}</p>
+            <p className="mdetails__overview">{movie.overview}</p>
+
+            <div className="mdetails__actions">
+              {trailer ? (
+                <button
+                  className="hero__btn hero__btn--primary"
+                  onClick={() => document.getElementById("trailer").scrollIntoView({ behavior: "smooth" })}
+                >
+                  ▶ Watch Trailer
+                </button>
+              ) : (
+                <button className="hero__btn hero__btn--primary" disabled style={{ opacity: 0.5 }}>
+                  Trailer Unavailable
+                </button>
+              )}
+
+              <button
+                className={`hero__btn hero__btn--secondary ${liked ? "hero__btn--liked" : ""}`}
+                onClick={handleLike}
+              >
+                {liked ? "❤️ In Your Picks" : "🤍 Add to Picks"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Details */}
+      <div className="mdetails__body app-container">
+
+        {/* Watch Providers Ribbon */}
+        <section className="mdetails__providers">
+          <WatchProviders movieId={id} />
+        </section>
+
+        {/* Trailer */}
+        {trailer && (
+          <section id="trailer" className="mdetails__section">
+            <h2 className="mdetails__section-title">Official Trailer</h2>
+            <div className="mdetails__video-wrap">
+              <iframe
+                src={`https://www.youtube.com/embed/${trailer}?rel=0`}
+                title="Trailer"
+                allowFullScreen
+              />
+            </div>
+          </section>
         )}
 
-        <button
-          onClick={async () => {
-            if (!user) return;
+        {/* Cast (Mobile-friendly horizontal scroll) */}
+        {cast.length > 0 && (
+          <section className="mdetails__section mdetails__cast-section">
+            <h2 className="mdetails__section-title">Top Cast</h2>
+            <div className="mdetails__cast-track">
+              {cast.map((c) => (
+                <div key={c.id} className="mdetails__cast-card">
+                  {c.profile_path ? (
+                    <img
+                      src={`https://image.tmdb.org/t/p/w185${c.profile_path}`}
+                      alt={c.name}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="mdetails__cast-placeholder">👤</div>
+                  )}
+                  <p className="mdetails__cast-name">{c.name}</p>
+                  <p className="mdetails__cast-role">{c.character}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-            if (liked) {
-              await unlikeMovie(user.uid, movie.id);
-              setLiked(false);
-            } else {
-              await likeMovie(user.uid, movie);
-              setLiked(true);
-            }
-          }}
-          className={`like-btn ${liked ? "liked" : ""}`}
-        >
-          {liked ? "Unlike" : "Like"}
-        </button>
-      </div> 
-
-      <p className="plot">{movie.overview}</p>
-
-      <h3>Cast</h3>
-      <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-        {cast.map(c=>(
-          <div key={c.id} style={{textAlign:"center"}}>
-            <img
-              src={`https://image.tmdb.org/t/p/w200${c.profile_path}`}
-              style={{borderRadius:10,width:120}}
-            />
-            <p>{c.name}</p>
-          </div>
-        ))}
+        {/* Recommendations via MovieRow */}
+        {similar.length > 0 && (
+          <section className="mdetails__recs">
+            <MovieRow title="Similar Titles For You" movies={similar} />
+          </section>
+        )}
       </div>
 
-      <h3>Recommended</h3>
-
-      <div className="movie-grid recs-grid">
-        {recs?.map(rec => (
-          <MovieCard key={rec.id} movie={rec} />
-        ))}
-      </div> 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        message="Sign in to save movies and build your personalization profile!"
+      />
     </div>
   );
 }

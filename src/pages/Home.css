@@ -1,66 +1,68 @@
-.page {
-  padding: 24px 32px;
-  color: white;
+.home {
+  min-height: 100vh;
 }
 
-.section-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 16px;
+/* Hero skeleton while loading */
+.home__hero-skeleton {
+  width: 100%;
+  height: clamp(500px, 65vh, 760px);
+  border-radius: 0;
 }
 
-.trending-header {
+/* Region strip */
+.home__region-strip {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 10px;
+  padding: 20px 24px 8px;
 }
 
+.home__region-label {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  white-space: nowrap;
+}
 
-.region-selector {
-  background-color: #333;
-  color: white;
-  border: 1px solid #555;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.home__region-select {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
   outline: none;
+  transition: border-color var(--dur);
 }
 
-.region-selector:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+.home__region-select:focus {
+  border-color: var(--accent);
 }
 
-/* movie grid */
-
-.movie-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 18px;
+.home__region-error {
+  font-size: 0.78rem;
+  color: #fbbf24;
+  margin-left: 4px;
 }
 
-/* skeleton loader */
-
-.skeleton-loader {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 18px;
+/* Rows container */
+.home__rows {
+  padding-top: 16px;
+  padding-bottom: 48px;
 }
 
-.skeleton-card {
-  background-color: #333;
-  border-radius: 8px;
-  height: 270px;
-  animation: pulse 1.5s ease-in-out infinite;
+/* Pagination (kept for compatibility) */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 24px 0 48px;
+  padding: 0 24px;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+.pagination-info {
+  font-size: 0.85rem;
+  color: var(--text-2);
 }

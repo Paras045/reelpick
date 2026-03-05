@@ -1,0 +1,99 @@
+.wp-container {
+  margin-top: 28px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wp-title {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.wp-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.wp-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #999;
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.wp-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wp-provider {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wp-provider:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.wp-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wp-name-fallback {
+  font-size: 0.6rem;
+  color: #ccc;
+  text-align: center;
+  padding: 4px;
+  line-height: 1.2;
+}
+
+.wp-more-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: #e50914;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.wp-more-link:hover {
+  color: #ff5c5c;
+}
+
+.wp-none {
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: #888;
+}
+
+.wp-none a {
+  color: #e50914;
+  text-decoration: none;
+}
+
+.wp-loading {
+  margin-top: 16px;
+  font-size: 0.88rem;
+  color: #666;
+}

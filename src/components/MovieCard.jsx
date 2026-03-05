@@ -37,11 +37,29 @@ const MovieCard = ({ movie, note }) => {
       onClick={() => navigate(`/movie/${movie.id}`, { state: movie })}
       style={{ cursor: "pointer" }}
     >
-      <img
-        className="movie-poster"
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-        alt={movie.title || movie.name}
-      />
+      {movie.poster_path ? (
+        <img
+          className="movie-poster"
+          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+          alt={movie.title || movie.name}
+          loading="lazy"
+        />
+      ) : (
+        <div
+          className="movie-poster"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#555",
+            fontSize: "0.75rem",
+            minHeight: 180,
+          }}
+        >
+          No Poster
+        </div>
+      )}
 
       <p className="movie-title">{movie.title || movie.name}</p>
 

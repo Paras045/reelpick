@@ -40,6 +40,7 @@ export default function Navbar() {
           <Link to="/search" className="nav-item">Search</Link>
           <Link to="/made-for-you" className="nav-item">Made for You</Link>
           <Link to="/top-picks-today" className="nav-item">Top Picks Today</Link>
+          <Link to="/taste-profile" className="nav-item">Taste Profile</Link>
         </nav>
       </div>
 

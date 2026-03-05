@@ -1,115 +1,110 @@
- import "./Home.css";
+import "./Home.css";
 import { useEffect, useState } from "react";
-import { getTrendingGlobal, getTrendingByRegion } from "../services/tmdb";
-import { getRecommendations } from "../services/recommend";
+import { getTrending } from "../services/api";
 import { REGIONS } from "../services/regions";
-import MovieCard from "../components/MovieCard";
+import HeroBanner from "../components/movies/HeroBanner";
+import MovieRow from "../components/movies/MovieRow";
 
-const Home = ({ likedMovies }) => {
+const Home = () => {
   const [region, setRegion] = useState("GLOBAL");
   const [movies, setMovies] = useState([]);
-  const [recs, setRecs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchTrending = async () => {
       setError(null);
       setLoading(true);
 
-      const cachedData = localStorage.getItem(`trending_${region}`);
-      if (cachedData) {
-        const trending = JSON.parse(cachedData);
-        setMovies(trending);
-        setRecs(getRecommendations(likedMovies, trending));
-        setLoading(false);
-        return;
+      // localStorage cache
+      const cached = localStorage.getItem(`trending_${region}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setMovies(parsed);
+          setLoading(false);
+          return;
+        } catch {
+          localStorage.removeItem(`trending_${region}`);
+        }
       }
 
-      console.log("Fetching trending for region:", region);
-
       try {
-        const data = region === "GLOBAL" ? await getTrendingGlobal() : await getTrendingByRegion(region);
-
-        console.log("TRENDING DATA:", data);
-
-        // Normalize response to always be an array:
-        // - if returned an array, use it
-        // - if it returned an axios response, use res.data.results
-        const trending = Array.isArray(data)
-          ? data
-          : data?.data?.results || data?.results || [];
-
-        // If no data returned, fallback to global trending
-        if (!trending || trending.length === 0) {
-          setError("Trending unavailable for this region. Showing global trending instead.");
-          const globalData = await getTrendingGlobal();
-          const globalTrending = Array.isArray(globalData)
-            ? globalData
-            : globalData?.data?.results || globalData?.results || [];
-          setMovies(globalTrending);
-          setRecs(getRecommendations(likedMovies, globalTrending));
-          localStorage.setItem(`trending_${region}`, JSON.stringify(globalTrending));
-        } else {
-          setMovies(trending);
-          setRecs(getRecommendations(likedMovies, trending));
-          localStorage.setItem(`trending_${region}`, JSON.stringify(trending));
-        }
-      } catch (err) {
-        console.error("Failed to load trending:", err);
-        setError("Trending unavailable for this region. Showing global trending instead.");
+        const res = await getTrending(region, 1);
+        const data = res.data.data;
+        const trending = data?.results || [];
+        if (data?._fallback) setError("Showing global trending — region data unavailable.");
+        setMovies(trending);
+        localStorage.setItem(`trending_${region}`, JSON.stringify(trending));
+      } catch {
+        setError("Could not load trending. Showing global instead.");
         try {
-          const globalData = await getTrendingGlobal();
-          const globalTrending = Array.isArray(globalData)
-            ? globalData
-            : globalData?.data?.results || globalData?.results || [];
-          setMovies(globalTrending);
-          setRecs(getRecommendations(likedMovies, globalTrending));
-          localStorage.setItem(`trending_${region}`, JSON.stringify(globalTrending));
-        } catch (globalErr) {
-          setMovies([]);
-          setRecs([]);
-        }
+          const res = await getTrending("GLOBAL", 1);
+          setMovies(res.data.data?.results || []);
+        } catch { setMovies([]); }
       } finally {
         setLoading(false);
       }
     };
 
     fetchTrending();
-  }, [region, likedMovies]);
+  }, [region]);
+
+  // Pick hero from position 2 (more visually interesting than index 0)
+  const heroMovie = movies[1] || movies[0] || null;
+  // Split into rows
+  const newReleases = movies.slice(0, 20);
+  const popularPicks = [...movies].reverse().slice(0, 20);
+  const topRated = movies.filter(m => m.vote_average >= 7).slice(0, 20);
 
   return (
-    <>
-      <div className="trending-header">
-        <h2>Trending</h2>
+    <div className="home">
+      {/* Hero Banner */}
+      {(loading || heroMovie) && (
+        loading ? (
+          <div className="home__hero-skeleton skeleton-base" />
+        ) : (
+          <HeroBanner movie={heroMovie} />
+        )
+      )}
+
+      {/* Region selector strip */}
+      <div className="home__region-strip">
+        <span className="home__region-label">Trending in</span>
         <select
-          className="region-selector"
+          className="home__region-select"
           value={region}
-          onChange={(e) => {
-            setRegion(e.target.value);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+          onChange={(e) => { setRegion(e.target.value); window.scrollTo({ top: 0, behavior: "smooth" }); }}
         >
-          {REGIONS.map(r => (
+          {REGIONS.map((r) => (
             <option key={r.code} value={r.code}>{r.label}</option>
           ))}
         </select>
+        {error && <span className="home__region-error">{error}</span>}
       </div>
-      {error && (
-        <div style={{ color: "#ffcc00", padding: "8px 0" }}>{error}</div>
-      )}
-      {loading ? (
-        <div className="skeleton-loader">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className="skeleton-card"></div>
-          ))}
-        </div>
-      ) : (
-        <div className="movie-grid">
-          {Array.isArray(movies) && movies.map(m => <MovieCard key={m.id} movie={m} />)}
-        </div>
-      )}
-    </>
+
+      {/* Movie Rows */}
+      <div className="home__rows">
+        <MovieRow
+          title="🔥 Trending Now"
+          movies={newReleases}
+          loading={loading}
+          viewAllPath="/movies"
+        />
+        <MovieRow
+          title="⭐ Top Rated"
+          movies={topRated}
+          loading={loading}
+          viewAllPath="/movies"
+        />
+        <MovieRow
+          title="🎬 Popular Picks"
+          movies={popularPicks}
+          loading={loading}
+          viewAllPath="/movies"
+        />
+      </div>
+    </div>
   );
 };
 

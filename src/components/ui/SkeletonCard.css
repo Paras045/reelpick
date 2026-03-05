@@ -1,0 +1,33 @@
+.sk-card {
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.sk-card__poster {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+}
+
+.sk-card__body {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sk-card__line {
+    height: 10px;
+    border-radius: 4px;
+}
+
+.sk-card__line--title {
+    width: 85%;
+}
+
+.sk-card__line--sub {
+    width: 55%;
+    height: 8px;
+}

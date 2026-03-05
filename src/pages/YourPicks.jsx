@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db, auth } from "../services/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import MovieCard from "../components/MovieCard";
+import MovieCard from "../components/movies/MovieCard";
 
 const YourPicks = () => {
   const [liked, setLiked] = useState([]);
@@ -24,12 +24,12 @@ const YourPicks = () => {
 
   return (
     <>
-      <h2 style={{color:"#fff"}}>Your Picks</h2>
+      <h2 style={{ color: "#fff" }}>Your Picks</h2>
 
       <div className="movie-grid">
         {liked.length === 0 && (
-          <p style={{color:"#aaa"}}>No likes yet</p>
-        )} 
+          <p style={{ color: "#aaa" }}>No likes yet</p>
+        )}
 
         {liked.map(movie => (
           <MovieCard key={movie.id} movie={movie} />
