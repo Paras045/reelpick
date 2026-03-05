@@ -41,12 +41,7 @@ app.use(
     },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
 
-
-
-// HTTP request logging (skip in test env)
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
