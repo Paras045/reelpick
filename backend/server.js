@@ -36,9 +36,18 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
       }
+    },
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
+app.use(express.json({ limit: '50mb' }));
+
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
 
 // Rate limiting — 200 requests per 15 minutes per IP
 const limiter = rateLimit({
