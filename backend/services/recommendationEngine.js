@@ -43,7 +43,8 @@ function hashToFloat(str) {
  */
 function scoreMovie(movie, prefs, liked, history) {
   try {
-
+    let score = 0;
+    const genreIds = getGenreIds(movie);
     const keywordIds = getKeywordIds(movie);
     const cast = movie.credits?.cast || [];
     const crew = movie.credits?.crew || [];
