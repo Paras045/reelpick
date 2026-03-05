@@ -8,9 +8,9 @@ import { getRecommendations } from "../services/api";
 
 export default function TopPicksToday() {
   const [user] = useAuthState(auth);
-  const [items, setItems] = useState([]);
   const [reasons, setReasons] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const recomputeTimer = useRef(null);
   const likesUnsubRef = useRef(null);
 
@@ -52,11 +52,14 @@ export default function TopPicksToday() {
 
         // Call backend hybrid engine
         const res = await getRecommendations(user.uid, prefs, liked, watchHistory, 20);
-        const { results } = res.data.data;
+        console.log("Top Picks result:", res.data); // Debug log
 
-        const movieResults = results.map((r) => r.movie);
+        const results = res.data?.data?.results || [];
+        const movieResults = results.map((r) => r.movie).filter(Boolean);
         const rmap = {};
-        results.forEach((r) => { rmap[r.movie.id] = r.reasons; });
+        results.forEach((r) => {
+          if (r.movie?.id) rmap[r.movie.id] = r.reasons;
+        });
 
         // Persist to Firestore cache
         await setDoc(
@@ -78,6 +81,7 @@ export default function TopPicksToday() {
         }
       } catch (err) {
         console.error("Failed to compute Top Picks:", err);
+        setError("Could not load Top Picks right now. Please try again later.");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -109,21 +113,28 @@ export default function TopPicksToday() {
     };
   }, [user]);
 
-  if (loading) return <p style={{ color: "#fff" }}>Loading Top Picks for Today…</p>;
-  if (!user) return <p style={{ color: "#fff" }}>Please sign in to see Top Picks for Today.</p>;
+  if (loading) return <p style={{ color: "#fff", padding: "40px" }}>Loading Top Picks for Today…</p>;
+  if (!user) return <p style={{ color: "#fff", padding: "40px" }}>Please sign in to see Top Picks for Today.</p>;
+  if (error) return <p style={{ color: "#ffcc00", padding: "40px" }}>{error}</p>;
   if (!items || items.length === 0)
-    return <p style={{ color: "#aaa" }}>No personalised picks available today.</p>;
+    return <p style={{ color: "#aaa", padding: "40px" }}>No personalised picks available today. Like more movies to get started!</p>;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2 style={{ color: "#fff" }}>Top Picks for Today</h2>
-      <p style={{ color: "#aaa" }}>Fresh picks tailored to your tastes</p>
+    <div className="top-picks-container">
+      <div className="section-header">
+        <h2 className="section-title">Top Picks for Today</h2>
+        <p className="section-subtitle">Fresh picks tailored to your tastes</p>
+      </div>
 
       <div className="movie-grid">
         {items.map((m) => (
-          <div key={m.id}>
+          <div key={m.id} className="made-card-wrap">
             <MovieCard movie={m} />
-            <small style={{ color: "#999" }}>{reasons[m.id]?.join(" • ")}</small>
+            {reasons[m.id] && (
+              <div className="reason-chip">
+                {reasons[m.id].join(" • ")}
+              </div>
+            )}
           </div>
         ))}
       </div>

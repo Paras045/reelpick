@@ -44,8 +44,8 @@ app.use(
   })
 );
 
-// JSON body parsing
-app.use(express.json());
+// JSON body parsing with increased limit (for large liked/history sets)
+app.use(express.json({ limit: '500kb' }));
 
 // HTTP request logging (skip in test env)
 if (process.env.NODE_ENV !== 'test') {

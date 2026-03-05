@@ -37,15 +37,19 @@ export default function MadeForYou() {
 
         // 4) Backend hybrid recommendation engine
         const res = await getRecommendations(user.uid, prefs, liked, watchHistory, 20);
-        const { results } = res.data.data;
+        console.log("Recommendations result:", res.data); // Debug log
 
-        setItems(results.map((r) => r.movie));
+        const results = res.data?.data?.results || [];
+        setItems(results.map((r) => r.movie).filter(Boolean));
+
         const rmap = {};
-        results.forEach((r) => { rmap[r.movie.id] = r.reasons; });
+        results.forEach((r) => {
+          if (r.movie?.id) rmap[r.movie.id] = r.reasons;
+        });
         setReasons(rmap);
       } catch (err) {
         console.error("Failed to load MadeForYou:", err);
-        setError("Could not load personalised picks right now.");
+        setError("Could not load personalised picks right now. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -61,13 +65,22 @@ export default function MadeForYou() {
     return <p style={{ color: "#aaa" }}>No personalised picks available yet. Like more movies!</p>;
 
   return (
-    <div className="page">
-      <h2 className="section-title">Made for You</h2>
-      <p className="section-subtitle">Movies &amp; shows picked by our hybrid recommendation engine</p>
+    <div className="made-container">
+      <div className="section-header">
+        <h2 className="section-title">Made for You</h2>
+        <p className="section-subtitle">Movies &amp; shows picked by our hybrid recommendation engine</p>
+      </div>
 
       <div className="movie-grid">
         {items.map((m) => (
-          <MovieCard key={m.id} movie={m} note={reasons[m.id]?.join(" • ")} />
+          <div key={m.id} className="made-card-wrap">
+            <MovieCard movie={m} />
+            {reasons[m.id] && (
+              <div className="reason-chip">
+                {reasons[m.id].join(" • ")}
+              </div>
+            )}
+          </div>
         ))}
       </div>
     </div>
