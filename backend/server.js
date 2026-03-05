@@ -112,7 +112,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     error: 'Internal server error',
-    ...(process.env.NODE_ENV !== 'production' && { details: err.message }),
+    details: err.message || 'Unknown error'
   });
 });
 

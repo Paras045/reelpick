@@ -52,31 +52,37 @@ function scoreMovie(movie, prefs, liked, history) {
   // ── Content-based: preference match ──────────────────────────────────────
 
   // Genre match (user saved preferences from onboarding)
+  const prefGenres = Array.isArray(prefs.genres) ? prefs.genres : [];
   genreIds.forEach((g) => {
-    if ((prefs.genres || []).includes(g)) score += 1.5;
+    if (prefGenres.includes(g)) score += 1.5;
   });
 
   // Actor overlap with user favourites
+  const prefActors = Array.isArray(prefs.actors) ? prefs.actors : [];
   cast.forEach((c) => {
-    if ((prefs.actors || []).find((a) => a.id === c.id || a.name === c.name)) score += 2;
+    if (prefActors.find((a) => a && (a.id === c.id || a.name === c.name))) score += 2;
   });
 
   // Director match
+  const prefDirectors = Array.isArray(prefs.directors) ? prefs.directors : [];
+  const prefWriters = Array.isArray(prefs.writers) ? prefs.writers : [];
+  
   crew.forEach((c) => {
     if (
       c.job === 'Director' &&
-      (prefs.directors || []).find((d) => d.id === c.id || d.name === c.name)
+      prefDirectors.find((d) => d && (d.id === c.id || d.name === c.name))
     )
       score += 2.5;
     if (
       (c.job === 'Writer' || c.job === 'Screenplay') &&
-      (prefs.writers || []).find((w) => w.id === c.id || w.name === c.name)
+      prefWriters.find((w) => w && (w.id === c.id || w.name === c.name))
     )
       score += 1.5;
   });
 
   // Language preference
-  if ((prefs.languages || []).includes(movie.original_language)) score += 1;
+  const prefLangs = Array.isArray(prefs.languages) ? prefs.languages : [];
+  if (prefLangs.includes(movie.original_language)) score += 1;
 
   // ── User-based: liked movies signals ─────────────────────────────────────
 
@@ -145,16 +151,19 @@ function explainMovie(movie, prefs, liked) {
   const cast = movie.credits?.cast || [];
   const crew = movie.credits?.crew || [];
 
+  const prefActors = Array.isArray(prefs.actors) ? prefs.actors : [];
   cast.slice(0, 5).forEach((c) => {
-    if ((prefs.actors || []).find((a) => a.name === c.name)) reasons.push(`Stars ${c.name}`);
+    if (prefActors.find((a) => a && a.name === c.name)) reasons.push(`Stars ${c.name}`);
   });
 
+  const prefDirectors = Array.isArray(prefs.directors) ? prefs.directors : [];
   crew.forEach((c) => {
-    if (c.job === 'Director' && (prefs.directors || []).find((d) => d.name === c.name))
+    if (c.job === 'Director' && prefDirectors.find((d) => d && d.name === c.name))
       reasons.push(`Directed by ${c.name}`);
   });
 
-  if (genreIds.some((g) => (prefs.genres || []).includes(g)))
+  const prefGenres = Array.isArray(prefs.genres) ? prefs.genres : [];
+  if (genreIds.some((g) => prefGenres.includes(g)))
     reasons.push('Matches your favourite genres');
 
   const likedGenreSet = new Set((liked || []).flatMap(getGenreIds));
@@ -213,12 +222,19 @@ async function computeRecommendations(userId, prefs = {}, liked = [], history = 
 
   // Score and sort
   const scored = details
-    .map((m) => ({
-      movie: m,
-      score: scoreMovie(m, prefs, liked, history) + dailyOffset,
-      reasons: explainMovie(m, prefs, liked),
-    }))
-    .filter((x) => x.score > 0)
+    .map((m) => {
+      try {
+        return {
+          movie: m,
+          score: scoreMovie(m, prefs, liked, history) + dailyOffset,
+          reasons: explainMovie(m, prefs, liked),
+        };
+      } catch (err) {
+        console.error(`Error scoring movie ${m?.id || 'unknown'}:`, err.message);
+        return null;
+      }
+    })
+    .filter((x) => x && x.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, maxResults);
 
