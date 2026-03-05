@@ -38,11 +38,7 @@ app.use(
       } else {
         callback(new Error('Not allowed by CORS'));
       }
-    },
-    methods: ['GET', 'POST', 'OPTIONS'],
 
-  app.use(morgan('dev'));
-}
 
 // Rate limiting — 200 requests per 15 minutes per IP
 const limiter = rateLimit({
