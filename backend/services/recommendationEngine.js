@@ -143,8 +143,7 @@ function scoreMovie(movie, prefs, liked, history) {
     console.error(`Fatal error in scoreMovie for ${movie?.id}:`, err);
     return 0;
   }
-}
-}
+
 
 /**
  * Build human-readable reasons why a movie was recommended.
