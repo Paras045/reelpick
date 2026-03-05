@@ -8,6 +8,7 @@ import { getRecommendations } from "../services/api";
 
 export default function TopPicksToday() {
   const [user] = useAuthState(auth);
+  const [items, setItems] = useState([]);
   const [reasons, setReasons] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
