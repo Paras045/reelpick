@@ -176,6 +176,10 @@ function explainMovie(movie, prefs, liked) {
 // ─── Main Entry Point ─────────────────────────────────────────────────────────
 
 const tmdb = require('./tmdbService');
+const cache = require('./cacheService');
+
+const CACHE_TTL_POOL = 3600; // 1 hour for search pools
+const CACHE_TTL_MOVIE = 86400; // 24 hours for fixed metadata
 
 /**
  * Compute hybrid recommendations for a user.
@@ -187,18 +191,24 @@ const tmdb = require('./tmdbService');
  * @param {number}   maxResults - max results to return
  */
 async function computeRecommendations(userId, prefs = {}, liked = [], history = [], maxResults = 20) {
-  // Fetch candidate pools
-  const [tRes, pRes, topRes] = await Promise.all([
-    tmdb.getTrendingAll().catch(() => ({ data: { results: [] } })),
-    tmdb.getPopularMovies().catch(() => ({ data: { results: [] } })),
-    tmdb.getTopRatedMovies().catch(() => ({ data: { results: [] } })),
-  ]);
+  // 1) Fetch candidate pools with caching
+  const poolKey = 'recs_candidate_pool';
+  let candidates = await cache.get(poolKey);
 
-  let candidates = [
-    ...(tRes.data.results || []),
-    ...(pRes.data.results || []),
-    ...(topRes.data.results || []),
-  ];
+  if (!candidates) {
+    const [tRes, pRes, topRes] = await Promise.all([
+      tmdb.getTrendingAll().catch(() => ({ data: { results: [] } })),
+      tmdb.getPopularMovies().catch(() => ({ data: { results: [] } })),
+      tmdb.getTopRatedMovies().catch(() => ({ data: { results: [] } })),
+    ]);
+
+    candidates = [
+      ...(tRes.data.results || []),
+      ...(pRes.data.results || []),
+      ...(topRes.data.results || []),
+    ];
+    await cache.set(poolKey, candidates, CACHE_TTL_POOL);
+  }
 
   // Dedupe and filter to movies only
   const seen = new Map();
@@ -208,12 +218,22 @@ async function computeRecommendations(userId, prefs = {}, liked = [], history = 
   });
   const unique = Array.from(seen.values());
 
-  // Fetch enriched details (credits + keywords) for up to 60 candidates
-  const MAX_FETCH = 60;
+  // Fetch enriched details (credits + keywords) with individual caching
+  const MAX_FETCH = 30; // Reduced from 60 for better cold-start performance
   const toFetch = unique.slice(0, MAX_FETCH);
 
   const details = await Promise.all(
-    toFetch.map((m) => tmdb.getMovieWithCredits(m.id, m))
+    toFetch.map(async (m) => {
+      const cacheKey = `movie_detail_v1_${m.id}`;
+      const cached = await cache.get(cacheKey);
+      if (cached) return cached;
+
+      const data = await tmdb.getMovieWithCredits(m.id, m);
+      if (data && data.id) {
+        await cache.set(cacheKey, data, CACHE_TTL_MOVIE);
+      }
+      return data;
+    })
   );
 
   // Daily variety offset
