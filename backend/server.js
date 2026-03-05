@@ -22,17 +22,7 @@ const PORT = process.env.PORT || 5000;
 // Security headers
 app.use(helmet());
 
-// CORS — allow frontend origins
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'https://reelpick-584c5.web.app',
-  process.env.CLIENT_ORIGIN
-].filter(Boolean);
 
-
-  app.use(morgan('dev'));
-}
 
 // Rate limiting — 200 requests per 15 minutes per IP
 const limiter = rateLimit({
