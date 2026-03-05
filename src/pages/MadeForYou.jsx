@@ -49,7 +49,8 @@ export default function MadeForYou() {
         setReasons(rmap);
       } catch (err) {
         console.error("Failed to load MadeForYou:", err);
-        setError("Could not load personalised picks right now. Please try again later.");
+        const msg = err.response?.data?.error || err.message;
+        setError(`Could not load picks: ${msg}`);
       } finally {
         setLoading(false);
       }

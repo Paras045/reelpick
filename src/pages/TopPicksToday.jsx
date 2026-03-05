@@ -82,7 +82,8 @@ export default function TopPicksToday() {
         }
       } catch (err) {
         console.error("Failed to compute Top Picks:", err);
-        setError("Could not load Top Picks right now. Please try again later.");
+        const msg = err.response?.data?.error || err.message;
+        setError(`Could not load Top Picks: ${msg}`);
       } finally {
         if (mounted) setLoading(false);
       }

@@ -69,6 +69,22 @@ app.use('/api/trending', trendingRouter);
 app.use('/api/recommendations', recommendationsRouter);
 app.use('/api/watch-providers', watchProvidersRouter);
 
+// Diagnostic: Check TMDB connectivity
+app.get('/api/diag/tmdb', async (req, res) => {
+  const { getPopularMovies } = require('./services/tmdbService');
+  try {
+    const test = await getPopularMovies(1);
+    res.json({ success: true, message: 'TMDB connectivity OK', data: { results_count: test.data.results?.length } });
+  } catch (err) {
+    res.status(502).json({ 
+      success: false, 
+      message: 'TMDB connectivity FAILED', 
+      error: err.message,
+      details: err.response?.data || 'No response data'
+    });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'ReelPick backend is running 🎬', time: new Date().toISOString() });
