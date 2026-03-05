@@ -32,16 +32,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-      }
-    },
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+
 
 app.use(express.json({ limit: '50mb' }));
 
