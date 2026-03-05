@@ -85,10 +85,7 @@ app.get('/api/diag/tmdb', async (req, res) => {
   }
 });
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'ReelPick backend is running 🎬', time: new Date().toISOString() });
-});
+
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
