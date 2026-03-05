@@ -22,10 +22,23 @@ const PORT = process.env.PORT || 5000;
 // Security headers
 app.use(helmet());
 
-// CORS — allow only the configured frontend origin
+// CORS — allow frontend origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://reelpick-584c5.web.app',
+  process.env.CLIENT_ORIGIN
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
+    origin: function(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
