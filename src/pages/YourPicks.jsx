@@ -17,9 +17,13 @@ const YourPicks = () => {
       where("userId", "==", user.uid)
     );
 
-    return onSnapshot(q, (snap) => {
+    const unsubscribe = onSnapshot(q, (snap) => {
       setLiked(snap.docs.map(doc => doc.data().movie));
     });
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, [user]);
 
   return (

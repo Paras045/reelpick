@@ -1,20 +1,19 @@
 import "./MovieDetails.css";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getMovieDetails } from "../services/api";
 import { likeMovie, unlikeMovie } from "../services/likes";
 import { auth, db } from "../services/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import MovieCard from "../components/movies/MovieCard";
 import MovieRow from "../components/movies/MovieRow";
 import WatchProviders from "../components/WatchProviders";
 import AuthModal from "../components/ui/AuthModal";
 import { doc, getDoc } from "firebase/firestore";
 import { saveWatch } from "../services/history";
+import { getStreamingUrl } from "../services/streaming";
 
 export default function MovieDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [movie, setMovie] = useState(null);
   const [trailer, setTrailer] = useState(null);
@@ -28,13 +27,16 @@ export default function MovieDetails() {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [user] = useAuthState(auth);
 
-  useEffect(() => window.scrollTo(0, 0), [id]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   useEffect(() => {
     if (!movie || !user) return;
-    const ref = doc(db, "userLikes", `${user.uid}_${movie.id}`);
+    const movieId = movie.id;
+    const ref = doc(db, "userLikes", `${user.uid}_${movieId}`);
     getDoc(ref).then((snap) => setLiked(!!snap.exists()));
-  }, [user, movie?.id]);
+  }, [user, movie]);
 
   useEffect(() => {
     if (user && movie) {
@@ -86,6 +88,7 @@ export default function MovieDetails() {
   const backdrop = movie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}` : null;
   const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null;
   const year = (movie.release_date || movie.first_air_date || "").slice(0, 4);
+  const streamingUrl = getStreamingUrl(movie.tmdbId || movie.id);
 
   return (
     <div className="mdetails">
@@ -128,6 +131,17 @@ export default function MovieDetails() {
             <p className="mdetails__overview">{movie.overview}</p>
 
             <div className="mdetails__actions">
+              {streamingUrl && (
+                <a
+                  href={streamingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hero__btn hero__btn--watch"
+                >
+                  ▶ Watch Now
+                </a>
+              )}
+
               {trailer ? (
                 <button
                   className="hero__btn hero__btn--primary"

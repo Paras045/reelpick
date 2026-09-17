@@ -111,7 +111,9 @@ export default function TopPicksToday() {
     return () => {
       mounted = false;
       if (recomputeTimer.current) clearTimeout(recomputeTimer.current);
-      if (likesUnsubRef.current) likesUnsubRef.current();
+      if (likesUnsubRef.current && typeof likesUnsubRef.current === 'function') {
+        likesUnsubRef.current();
+      }
     };
   }, [user]);
 

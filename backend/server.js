@@ -22,7 +22,29 @@ const PORT = process.env.PORT || 5000;
 // Security headers
 app.use(helmet());
 
+// CORS — allow the configured frontend origin plus the common local React dev ports.
+const allowedOrigins = Array.from(new Set([
+  ...(process.env.CLIENT_ORIGIN || '').split(',').map((origin) => origin.trim()),
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+].filter(Boolean)));
 
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (server-to-server, curl, health checks)
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error(`CORS: origin ${origin} not allowed`));
+  },
+  credentials: true,
+}));
+
+// Body parsing
+app.use(express.json());
+
+// HTTP request logging
+app.use(morgan('dev'));
 
 // Rate limiting — 200 requests per 15 minutes per IP
 const limiter = rateLimit({

@@ -11,4 +11,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: CLIENT_ORIGIN
-        value: https://reelpick-584c5.web.app
+        value: https://reelpick-584c5.web.app,http://localhost:3000
+      - key: TMDB_BEARER
+        sync: false  # Set in Render Dashboard — never commit secrets
+      - key: TMDB_API_KEY
+        sync: false  # Set in Render Dashboard — never commit secrets

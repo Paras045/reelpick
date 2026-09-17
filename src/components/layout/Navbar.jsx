@@ -19,7 +19,9 @@ export default function Navbar() {
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-        return unsub;
+        return () => {
+            if (typeof unsub === 'function') unsub();
+        };
     }, []);
 
     // Navbar glass on scroll

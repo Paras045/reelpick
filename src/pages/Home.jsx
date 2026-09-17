@@ -36,12 +36,16 @@ const Home = () => {
         if (data?._fallback) setError("Showing global trending — region data unavailable.");
         setMovies(trending);
         localStorage.setItem(`trending_${region}`, JSON.stringify(trending));
-      } catch {
+      } catch (err) {
+        console.error("[Home] Trending fetch failed:", err.message, err.response?.status, err.response?.data);
         setError("Could not load trending. Showing global instead.");
         try {
           const res = await getTrending("GLOBAL", 1);
           setMovies(res.data.data?.results || []);
-        } catch { setMovies([]); }
+        } catch (fallbackErr) {
+          console.error("[Home] Fallback fetch also failed:", fallbackErr.message, fallbackErr.response?.status);
+          setMovies([]);
+        }
       } finally {
         setLoading(false);
       }

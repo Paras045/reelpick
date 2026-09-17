@@ -178,7 +178,20 @@
 
 .mdetails__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
+}
+
+.hero__btn--watch {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  background: #e50914;
+  color: #fff;
+}
+
+.hero__btn--watch:hover {
+  background: #f5222e;
 }
 
 /* ── Body Sections ──────────────────────────────────────────── */

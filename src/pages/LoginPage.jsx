@@ -73,7 +73,7 @@ export default function LoginPage() {
                     </button>
 
                     <p className="login-page__terms">
-                        By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                        By continuing, you agree to our <a href="/">Terms of Service</a> and <a href="/">Privacy Policy</a>.
                     </p>
                 </div>
             </div>
