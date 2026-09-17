@@ -25,6 +25,7 @@ app.use(helmet());
 // CORS — allow the configured frontend origin plus the common local React dev ports.
 const allowedOrigins = Array.from(new Set([
   ...(process.env.CLIENT_ORIGIN || '').split(',').map((origin) => origin.trim()),
+  'https://reelpick-584c5.web.app',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3000',
